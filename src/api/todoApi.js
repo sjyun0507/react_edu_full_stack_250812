@@ -22,6 +22,7 @@ export const postAdd = async (todoObj) => {
 }
 
 export const deleteOne = async (tno) => {
+    console.log(tno)
     const res = await axios.delete(`${prefix}/${tno}`)
     return res.data;
 }

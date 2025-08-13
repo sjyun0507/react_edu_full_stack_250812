@@ -1,16 +1,20 @@
 import {useEffect, useState} from "react";
-import {getOne} from "../../api/todoApi.js";
+import {deleteOne,getOne, putOne} from "../../api/todoApi.js";
+import ResultModal from "../common/ResultModal.jsx";
+import useCustomMove from "../../hooks/useCustomMove.js";
 
 const initState = {
     tno: 0,
     title: '',
     writer: '',
-    dueDate: null,
+    dueDate: '',
     complete: false
 }
 
 const ModifyComponent = ({tno}) => {
-    const [todo, setTodo] = useState({initState})
+    const [todo, setTodo] = useState(initState)
+    const [result, setResult] = useState(null)
+    const {moveToList, moveToRead} = useCustomMove()
 
     useEffect(() => {
         getOne(tno).then(data => setTodo(data))
@@ -26,10 +30,32 @@ const ModifyComponent = ({tno}) => {
         todo.complete = (value === 'Y')
         setTodo({...todo})
     }
+    const handleClickModify = () => {
+        putOne(todo).then(data => {
+            console.log("modify result:" + data)
+            setResult('Modified')
+        })
+    }
+    const handleClickDelete = () => {
+        deleteOne(tno).then(data => {
+            console.log("delete result:" + data)
+            setResult('Deleted')
+        })
+    }
+    const closeModal = () => {
+       if(result === "Deleted") {
+           moveToList();
+       } else {
+           moveToRead(tno);
+       }
+    }
 
 
     return (
         <div className="border-2 border-sky-200 mt-10 m-2 p-4">
+            {/* 모달 처리 */}
+            {result ? <ResultModal title ={'처리결과'} content={`${result}`} callbackFn={closeModal}/>: <></>}
+
 
             <div className="flex justify-center mt-10">
                 <div className="relative mb-4 flex w-full flex-wrap items-stretch">
@@ -85,11 +111,11 @@ const ModifyComponent = ({tno}) => {
             </div>
 
             <div className="flex justify-end p-4">
-                <button type="button"
+                <button type="button" onClick={handleClickDelete}
                         className="inline-block rounded p-4 m-2 text-xl w-32  text-white bg-red-500">
                     Delete
                 </button>
-                <button type="button"
+                <button type="button" onClick={handleClickModify}
                         className="rounded p-4 m-2 text-xl w-32 text-white bg-blue-500">
                     Modify
                 </button>
